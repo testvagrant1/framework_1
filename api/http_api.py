@@ -75,6 +75,7 @@ class http_api:
             
             assert response.status_code == expected_status_code, "By default expected_status_code is 200 else pass argument\
                 expected_status_code= , Expected: {}, Found: {}".format(expected_status_code, response.status_code)
+            print("Status code verified successfully! Expected: {}, Found: {}".format(expected_status_code, response.status_code))
 
         else:
             assert type(x) is requests.models.Response,\
@@ -85,5 +86,5 @@ if __name__ == "__main__":
 
     httpApi = http_api("https://api.punkapi.com/v2/")
     response = httpApi.get_response("Get", "beers?page=1&per_page=80")
-    httpApi.verify_response(response, content_type="json", verify_as="expression", expected_status_code=200, expected_content="len({})==80")
+    httpApi.verify_response(response, content_type="json", verify_as="expression", expected_status_code=200, expected_content="len({})==90")
 
