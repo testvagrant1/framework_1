@@ -48,9 +48,19 @@ class http_api:
 
         verify_as: It takes an arguument equal, less, greater, expression, regex and use it to compare
         
-        usage: 
+        usage:
+
+            httpApi = http_api("https://api.punkapi.com/v2/")
+            response = httpApi.get_response("Get", "beers?page=1&per_page=80")
+
+            
+            httpApi.verify_response(response, content_type="json", verify_as="expression", expected_status_code=200, expected_content="len({})==90")
+            
         '''
         if type(response) is requests.models.Response:
+
+            status = False
+            
             if expected_content is not None:
                 if content_type == "raw":
                     content = response.content
@@ -61,21 +71,32 @@ class http_api:
                     if verify_as == "equal":
                         assert content == expected_content, "Failed! Expected content: {}, Found content : {}".format(expected_content, content)
                         print("Verified successfully! Expected content: {}, Found content : {}".format(expected_content, content))
+                        status = True
                     elif verify_as == "expression":
                         expression = expected_content.format(content)
                         evaluation = eval(expression)
                         assert evaluation, "Failed! Expression : {}, Evaluation : {}".format(expression, evaluation)
                         print("Verified successfully! Expression : {}, Evaluation : {}".format(expression, evaluation))
+                        status = True
                     else:
                         print("Either, verify_as is not implemented or invalid")
                 except Exception as e:
+                    status = False
                     print("At least content verification failed due to {}".format(e))
             else:
                 pass
-            
-            assert response.status_code == expected_status_code, "By default expected_status_code is 200 else pass argument\
-                expected_status_code= , Expected: {}, Found: {}".format(expected_status_code, response.status_code)
-            print("Status code verified successfully! Expected: {}, Found: {}".format(expected_status_code, response.status_code))
+
+            if expected_status_code is not None:
+                try:
+                    assert response.status_code == expected_status_code, "By default expected_status_code is 200 else pass argument\
+                        expected_status_code= , Expected: {}, Found: {}".format(expected_status_code, response.status_code)
+                    print("Status code verified successfully! Expected: {}, Found: {}".format(expected_status_code, response.status_code))
+                    status = True
+                except Exception as e:
+                    status = False
+                    print("Status verification failed due to {}".format(e))
+            else:
+                pass
 
         else:
             assert type(x) is requests.models.Response,\
